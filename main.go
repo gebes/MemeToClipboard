@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	Endpoint = "https://meme-api.herokuapp.com/gimme"
+	Endpoint = "https://meme-api.herokuapp.com/gimme/dankmemes"
 )
 
 type Response struct {
