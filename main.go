@@ -5,8 +5,8 @@ import (
 	"errors"
 	"github.com/atotto/clipboard"
 	"io/ioutil"
-	"log"
 	"net/http"
+	"os"
 	"strconv"
 )
 
@@ -22,26 +22,28 @@ func main() {
 
 	meme, err := getMeme()
 	if err != nil {
-		log.Fatalln("Could not fetch a meme", err)
+		println("Could not fetch a meme:", err.Error())
+		os.Exit(1)
 	}
 
 	err = clipboard.WriteAll(meme)
 	if err != nil {
-		log.Fatalln("Could not copy the meme to the clipboard", err)
+		println("Could not copy the meme to the clipboard:", err.Error())
+		os.Exit(2)
 	}
 
-	println("Copied meme to clipboard")
 	println(meme)
 
 }
 
 func getMeme() (string, error){
 	res, err := http.Get(Endpoint)
-	defer res.Body.Close()
 
 	if err != nil {
 		return "", err
 	}
+
+	defer res.Body.Close()
 
 	if res.StatusCode != http.StatusOK {
 		return "", errors.New("status code " + strconv.Itoa(res.StatusCode))
@@ -56,6 +58,10 @@ func getMeme() (string, error){
 	err = json.Unmarshal(body, &response)
 	if err != nil {
 		return "", err
+	}
+
+	if len(response.Preview) == 0 {
+		return "", errors.New("no meme found")
 	}
 
 	return response.Preview[len(response.Preview)-1], nil
